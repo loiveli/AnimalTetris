@@ -8,8 +8,12 @@ var allblocks = [];
 var xScale = canvas.width / columns;
 var yScale = canvas.height / rows;
 var paused = false;
-
-var timeScale = 500;
+var leftKey = false
+var downKey = false
+var upKey = false
+var rightKey = false
+var timer = 0;
+var timeScale = 5
 var frames = 0;
 var Iblock = {
   blocks: [{ x: 1, y: 0 }, { x: 0, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }],
@@ -23,20 +27,64 @@ var currentBlock = {
   blocks: null,
   pos: null
 };
-gameInit = ()=>{
-    var blocks = [Lblock,Iblock]
-    var RNGblock = Object.assign({},blocks[1])
-    currentBlock ={
-        blocks: RNGblock,
-        pos:{ x: Math.round(Math.random() * (columns - 4)), y: 15 }
-    }
-    console.log(currentBlock)
-    draw()
-}
+blockInit = () => {
+  var blocks = [Lblock, Iblock];
+  var RNGblock = Object.assign({}, blocks[Math.round(Math.random()*(blocks.length-1))]);
+  currentBlock = {
+    blocks: RNGblock.blocks,
+    type: RNGblock.type,
+    pos: { x: Math.round(Math.random() * (columns - 4)), y: 15 }
+  };
+  console.log(currentBlock);
+  draw();
+};
 keyDownHandler = e => {
   console.log(getBlockPos(currentBlock, currentBlock.pos));
-  paused = !paused;
-  console.log("pressed key");
+  
+  switch(e.code){
+    case "ArrowLeft":
+    leftKey = true;
+    break;
+    case "ArrowRight":
+    rightKey = true;
+    break;
+    case "ArrowUp":
+    upKey = true;
+    break;
+    case "ArrowDown":
+    downKey = true;
+    break;
+    case "Space":
+    paused = !paused;
+    break;
+  }
+  
+  console.log("pressed key: " +e.code);
+
+};
+keyUpHandler = e => {
+  console.log(getBlockPos(currentBlock, currentBlock.pos));
+  
+  switch(e.code){
+    case "ArrowLeft":
+    leftKey = true;
+    break;
+    case "ArrowRight":
+    rightKey = true;
+    break;
+    case "ArrowUp":
+    upKey = true;
+    break;
+    case "ArrowDown":
+    downKey = true;
+    break;
+    case "Space":
+    paused = !paused;
+    break;
+  }
+  
+  console.log("pressed key: " +e.code);
+
 };
 drawGrid = () => {
   for (var i = 0; i < rows; i++) {
@@ -82,17 +130,31 @@ drawBlock = block => {
   ctx.fill();
   ctx.closePath();
 };
+moveBlock = (block,vector2) => {
+  var posBlock = Object.assign({},block) 
+  posBlock.pos ={x:posBlock.pos.x+vector2.x,y:posBlock.pos.y+vector2.y}
+    return posBlock
+};
 checkCollision = (block, collision) => {
   var posBlocks = getBlockPos(block, block.pos);
   var collided = false;
-  if (posBlocks.some(e => e.y === 0)) {
+  
+  var collisionArray =[]
+  collision.forEach(element=>{
+    collisionArray = collisionArray.concat(getBlockPos(element,element.pos))
+  })
+  posBlocks.forEach(element =>{
+    //console.log(element)
+    collisionArray.forEach(e=>{
+      if(element.x === e.x&&element.y === e.y){
+        console.log("asd")
+        collided = true
+      }
+    })
+  })
+  if (posBlocks.some(e => e.y === -1)) {
     collided = true;
   }
-  var correctBlocks = [];
-  collision.forEach(element => {
-    correctBlocks = correctBlocks.concat(getBlockPos(element, element.pos));
-  });
-
   if (collided) {
     return true;
   } else {
@@ -101,19 +163,39 @@ checkCollision = (block, collision) => {
 };
 ctx.translate(0, canvas.height);
 ctx.scale(1, -1);
-draw = () => {
-  if (!paused) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawGrid();
+collision =(block) =>{
+  var newBlock = Object.assign({},block)
+  allblocks.push(newBlock)
+  console.log(allblocks)
+}
+pysics = () => {
+  timer++
+  if (!checkCollision(moveBlock(currentBlock,{x:0,y:-1}),allblocks)&&timer >= timeScale) {
+   timer =0
+    currentBlock = moveBlock(currentBlock,{x:0,y:-1})
 
-    drawBlock(currentBlock);
-    allblocks.forEach(element => {
-      drawBlock(element);
-    });
+  }else if(checkCollision(moveBlock(currentBlock,{x:0,y:-1}),allblocks)){
+    collision(currentBlock)
+    blockInit()
   }
 };
+gameLoop = () => {
+  if (!paused) {
+    pysics();
+    draw();
+  }
+};
+draw = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
 
-gameInit()
-setInterval(draw, timeScale);
+  drawBlock(currentBlock);
+  allblocks.forEach(element => {
+    drawBlock(element);
+  });
+};
 
+blockInit();
+setInterval(gameLoop, 100);
+document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("keydown", keyDownHandler, false);
