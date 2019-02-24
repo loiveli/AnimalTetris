@@ -82,6 +82,7 @@ function setup() {
   GameInit();
   drawPixiGrid()
   PixiInit()
+  setInterval(gameLoop, 10); 
   UI.renderer.backgroundColor = 0xffffff
   app.renderer.backgroundColor = 0x00ffff
 }
@@ -132,7 +133,7 @@ handleNext=(newB,init)=>{
  
   for(var i = 0;i<newUIblocks.length;i++){
     
-    newUIblocks[i].x = i*60//+newUIblocks[i].pivot.x
+    newUIblocks[i].x = i*60+newUIblocks[i].pivot.x
     newUIblocks[i].y = 120
 
   }

@@ -62,7 +62,7 @@ blockInit = () => {
   newBlock = {
     blocks: RNGblock.blocks,
     type: RNGblock.type,
-    pos: { x: 2, y: 15 },
+    pos: { x: Math.round(Math.random()*6), y: 16 },
     id:blockID,
     rotation:0
   };
@@ -79,6 +79,7 @@ collision = (block, connection) => {
     //console.log(allblocks);
   }else{
     points +=10
+    timeScale-=1
     connection.forEach(element => {
       if(allblocks.indexOf(element)>=0){
         if(block !== element){
@@ -100,6 +101,7 @@ gameLoop = () => {
     pysics();
     draw();
     checkBlocks()
+    checkLose()
   }
 };
 
@@ -115,7 +117,7 @@ GameInit=()=>{
   nextBlocks.forEach(e=>{
     handleNext(e,true)
   })
-  setInterval(gameLoop, 10);
+  
   paused = false
 }
 document.addEventListener("keyup", keyUpHandler, false);

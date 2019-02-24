@@ -93,7 +93,7 @@ checkCollision = (block, collision) => {
       collisions.push(collision[collisionArray.indexOf(element)]);
     }
   });
-
+ 
   if (posBlocks.some(e => e.y === -1)) {
     collided = true;
   }
@@ -121,11 +121,14 @@ getNewBlock = () => {
 }
 pysics = () => {
   timer++;
-  timeScale = 50;
+  var aika = timeScale;
   var rightCollision = checkCollision(
     moveBlock(currentBlock, { x: 1, y: 0 }),
     allblocks
   );
+  if (downKey) {
+    aika = aika/2;
+  }
   if (rightKey) {
     rightTimer++;
   } else {
@@ -136,7 +139,7 @@ pysics = () => {
   } else {
     leftTimer = 0;
   }
-  if (rightTimer > timeScale / 5 && rightCollision === false) {
+  if (rightTimer > aika / 5 && rightCollision === false) {
     rightTimer = 0;
     currentBlock = moveBlock(currentBlock, { x: 1, y: 0 });
   } else if (!rightKey && rightCollision.length >= 1) {
@@ -148,7 +151,7 @@ pysics = () => {
     moveBlock(currentBlock, { x: -1, y: 0 }),
     allblocks
   );
-  if (leftTimer > timeScale / 5 && leftCollision === false) {
+  if (leftTimer > aika / 5 && leftCollision === false) {
     currentBlock = moveBlock(currentBlock, { x: -1, y: 0 });
     leftTimer = 0;
   } else if (!leftKey && leftCollision.length >= 1) {
@@ -159,9 +162,7 @@ pysics = () => {
   if (leftCollision.pos) {
     //console.log("asd")
   }
-  if (downKey) {
-    timeScale = 25;
-  }
+ 
   if (upKey) {
     var rotatedBlock = Object.assign({}, currentBlock);
     rotatedBlock.blocks = rotateBlock(rotatedBlock, -90);
@@ -175,7 +176,7 @@ pysics = () => {
     moveBlock(currentBlock, { x: 0, y: -1 }),
     allblocks
   );
-  if (downCollision === false && timer >= timeScale) {
+  if (downCollision === false && timer >= aika) {
     timer = 0;
     currentBlock = moveBlock(currentBlock, { x: 0, y: -1 });
   } else if (downCollision === true) {
@@ -189,3 +190,20 @@ pysics = () => {
   }
   fallDown();
 };
+
+checkLose=()=>{
+  var loseBlocks =[]
+  allblocks.forEach(e=>{
+    loseBlocks = loseBlocks.concat(getBlockPos(e,e.pos))
+  })
+  if(loseBlocks.some(e=>e.y >=15)){
+    allblocks.splice(0,allblocks.length)
+    
+    pointText.text = "YOU LOSE"
+    points = 0
+    paused = true
+    timeScale = 50
+    currentBlock = nextBlocks.shift()
+    AddBlock(currentBlock)
+  }
+}
